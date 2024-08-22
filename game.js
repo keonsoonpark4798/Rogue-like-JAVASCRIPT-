@@ -1,9 +1,9 @@
 import chalk from 'chalk';
 import readlineSync from 'readline-sync';
-import {start} from "./server.js";
 
 class Player {
-  constructor(hp,atk,x,luk,combo,def) {
+  constructor(name,hp,atk,x,luk,combo,def) {
+    this._name = name;            // 플레이어 이름
     this._hp = hp;                // 최대 체력
     this._currentHP = hp;         // 현재 체력
     this._atk = atk;              // 최소 공격력
@@ -11,6 +11,13 @@ class Player {
     this._luk = luk;              // 도망 확률
     this._combo = combo;          // 연속 공격 확률
     this._def = def;              // 방어확률
+  }
+  
+  get name(){  // 이름 get,set
+    return this._name;
+  }
+  set name(value){
+    this._name = value;
   }
 
   get hp(){  // 최대 체력 get,set
@@ -134,10 +141,10 @@ function displayStatus(stage, player, monster) {
   console.log(
     chalk.cyanBright(`| Stage: ${stage} `) +
     chalk.blueBright(
-      `| 플레이어 HP: ${player._currentHP}, Attack: ${player._atk}-${player._atk + Math.ceil(player._atk * player._maxatk)}`,
+      `| ${player.name} HP: ${player.currentHp}, Attack: ${player.atk}-${player.atk + Math.ceil(player.atk * player.maxatk)}`,
     ) +
     chalk.redBright(
-      `| 몬스터 정보 HP: ${monster._hp}, Attack: ${monster._atk} |`,
+      `| 몬스터 정보 HP: ${monster.hp}, Attack: ${monster.atk} |`,
     ),
   );
   console.log(chalk.magentaBright(`=====================\n`));
@@ -195,7 +202,7 @@ const battle = async (stage, player, monster) => {
               run = true;
             }
             else {
-              logs.push(chalk.green(`당신은 몬스터의 프레셔에 몸이 굳어 도망치지 못했습니다.`));
+              logs.push(chalk.green(`도망칠 수 없다!`));
               logs.push(monster.attack(player));
             }
             break;
@@ -244,8 +251,11 @@ const battle = async (stage, player, monster) => {
   }
 };
 
-export async function startGame(cheat) {
+export async function startGame(cheat, playername) {
   console.clear();
+  if(playername == null)
+    playername = "플레이어";
+
   let hp = 100;     // 초기 값 : 체력, 공격력, 최대공격력 배율, 도망 확률, 연속 공격 확률, 방어 확률
   let atk = 5;
   let maxatk = 0;
@@ -253,7 +263,7 @@ export async function startGame(cheat) {
   let combo = 25;
   let def = 55;
 
-  if(cheat == '1')
+  if(cheat)
   {
     hp = 99999;
     atk = 99999;
@@ -261,7 +271,7 @@ export async function startGame(cheat) {
     combo = 100;
     def = 100;
   }
-  const player = new Player(hp,atk,maxatk,luk,combo,def);
+  const player = new Player(playername,hp,atk,maxatk,luk,combo,def);
   let stage = 1;
 
   while (stage <= 10) {

@@ -3,6 +3,7 @@ import figlet from 'figlet';
 import readlineSync from 'readline-sync';
 import {startGame} from "./game.js";
 
+let playername = "플레이어";
 // 로비 화면을 출력하는 함수
 function displayLobby() {
     console.clear();
@@ -24,6 +25,7 @@ function displayLobby() {
 
     // 게임 이름
     console.log(chalk.yellowBright.bold('CLI 게임에 오신것을 환영합니다!'));
+    console.log(chalk.yellowBright.bold(`${playername}님`));
 
     // 설명 텍스트
     console.log(chalk.green('옵션을 선택해주세요.'));
@@ -44,14 +46,13 @@ function displayLobby() {
 
 // 유저 입력을 받아 처리하는 함수
 function handleUserInput() {
-
     const choice = readlineSync.question('입력: ');
 
     switch (choice) {
         case '1':
             console.log(chalk.green('게임을 시작합니다.'));
             // 여기에서 새로운 게임 시작 로직을 구현
-            startGame('0');
+            startGame(false,playername);
             break;
         case '2':
             console.log(chalk.yellow('구현 준비중입니다.. 게임을 시작하세요'));
@@ -59,7 +60,7 @@ function handleUserInput() {
             handleUserInput();
             break;
         case '3':
-            console.log(chalk.blue('1. 치트 모드(모든 스탯이 99999가 됩니다) 아무키. 취소'));
+            console.log(chalk.blue('1. 치트 모드(모든 스탯이 99999가 됩니다) 2. 플레이어 이름 변경 3. 로비로'));
             // 옵션 메뉴 로직을 구현
             handleOptionInput();
             break;
@@ -74,19 +75,37 @@ function handleUserInput() {
     }
 }
 
-function handleOptionInput(){
-    const choice = readlineSync.question('입력: ');
+// 옵션 입력
+function handleOptionInput(){ 
+    const choice = readlineSync.question('옵션 입력: ');
     switch (choice) {
         case '1':
-            startGame('1');
+            startGame(true,playername);
+            break;
+        case '2':
+            playernameChange();
             break;
         default:
             start();
     }
 }
 
+function playernameChange(){
+    const name = readlineSync.question('이름 입력(한글입력 x): ');
+    // const textEncoder = new TextEncoder();
+    // const textDecoder = new TextDecoder();
+    // const bytes = textEncoder.encode(name);
+    // playername= textDecoder.decode(name);
+    const regx = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
+    if(!regx.test(name))
+    {
+        playername = name;
+    }
+    start();
+}
+
 // 게임 시작 함수
-export async function start() {
+function start() {
     displayLobby();
     handleUserInput();
 }
