@@ -51,7 +51,7 @@ function handleUserInput() {
         case '1':
             console.log(chalk.green('게임을 시작합니다.'));
             // 여기에서 새로운 게임 시작 로직을 구현
-            startGame();
+            startGame('0');
             break;
         case '2':
             console.log(chalk.yellow('구현 준비중입니다.. 게임을 시작하세요'));
@@ -59,9 +59,9 @@ function handleUserInput() {
             handleUserInput();
             break;
         case '3':
-            console.log(chalk.blue('구현 준비중입니다.. 게임을 시작하세요'));
+            console.log(chalk.blue('1. 치트 모드(모든 스탯이 99999가 됩니다) 아무키. 취소'));
             // 옵션 메뉴 로직을 구현
-            handleUserInput();
+            handleOptionInput();
             break;
         case '4':
             console.log(chalk.red('게임을 종료합니다.'));
@@ -71,6 +71,17 @@ function handleUserInput() {
         default:
             console.log(chalk.red('올바른 선택을 하세요.'));
             handleUserInput(); // 유효하지 않은 입력일 경우 다시 입력 받음
+    }
+}
+
+function handleOptionInput(){
+    const choice = readlineSync.question('입력: ');
+    switch (choice) {
+        case '1':
+            startGame('1');
+            break;
+        default:
+            start();
     }
 }
 
