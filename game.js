@@ -199,6 +199,7 @@ const battle = async (stage, player, monster) => {
         case "2" : // 연속 공격
             if(ran<=player._combo) {
               logs.push(chalk.green(`이연참!`));
+              util.sound();
               logs.push(player.attack(monster));
               logs.push(player.attack(monster));
             }
