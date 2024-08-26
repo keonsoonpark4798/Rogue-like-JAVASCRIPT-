@@ -95,7 +95,7 @@ class Player {
     this._currentHP = this._hp;
   }
   levelup(){  // 스테이지 클리어시 레벨업 함수
-    console.log(chalk.green(`레벨업!!`));
+    console.log(chalk.green(`레벨업!!\n`));
     for(let i = 0; i<3; i++)
     {
       const ran = util.random(1,5);
@@ -143,7 +143,7 @@ class Player {
 class Monster extends Player{
   constructor(stage,hp,atk) {
     super(hp);
-    let ran =  util.random(1,8) / 10; // 0.1 ~ 0.8
+    let ran =  util.random(4,8) / 10; // 0.1 ~ 0.8
     this._hp = hp * stage * ran;
     this._atk = Math.ceil(atk * stage * ran);
   }
@@ -274,7 +274,7 @@ const battle = async (stage, player, monster) => {
   }
 };
 const rise = async () => {
-  const choice = readlineSync.question('휴식을 마치고 탑을 오르겠습니까?(yes/no)');
+  const choice = readlineSync.question('\n\n휴식을 마치고 탑을 오르겠습니까?(yes/no)');
   switch(choice)
   {
     case 'yes':

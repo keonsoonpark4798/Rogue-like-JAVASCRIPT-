@@ -92,10 +92,6 @@ function handleOptionInput(){
 
 function playernameChange(){
     const name = readlineSync.question('이름 입력(한글입력 x): ');
-    // const textEncoder = new TextEncoder();
-    // const textDecoder = new TextDecoder();
-    // const bytes = textEncoder.encode(name);
-    // playername= textDecoder.decode(name);
     const regx = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
     if(!regx.test(name))
     {
