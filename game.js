@@ -143,7 +143,7 @@ class Player {
 class Monster extends Player{
   constructor(stage,hp,atk) {
     super(hp);
-    let ran =  util.random(4,8) / 10; // 0.1 ~ 0.8
+    let ran =  util.random(4,6) / 10; // 0.4 ~ 0.6
     this._hp = hp * stage * ran;
     this._atk = Math.ceil(atk * stage * ran);
   }
@@ -154,6 +154,76 @@ class Monster extends Player{
   }
   damage(damage){
     this._hp -= damage;
+  }
+}
+
+class Boss extends Player{
+  constructor(hp,atk) {
+    super(hp);
+    this._hp = hp;                
+    this._atk = atk;
+    this._shield = 100;
+    this._pattern = false;
+    this.flag = true;
+    this._count = 5;
+  }
+
+  get shield(){  // 실드 get,set
+    return this._shield;
+  }
+  set shield(value){
+    this._shield = value;
+  }
+
+  get count(){  // 카운트 get,set
+    return this._count;
+  }
+  set count(value){
+    this._count = value;
+  }
+
+  get pattern(){  // 패턴 get,set
+    return this._pattern;
+  }
+  set pattern(value){
+    this._pattern = value;
+  }
+
+  attack(player) {
+    if(this.hp<250 && this.pattern === true) {
+    }
+    else {
+      player.damage(this._atk);
+      return chalk.red(`보스가 ${this._atk}의 데미지를 입혔습니다.`);
+    }
+  }
+  damage(damage){
+    if(this.hp<250 && this.pattern === true) {
+      this.shield -= damage;
+    }
+    else{
+      this.hp -= damage;
+    }
+  }
+  countdown(player){
+    if(this.shield<=0)
+    {
+      this.pattern = false;
+      this.flag = false;
+      return chalk.green(`실드가 깨지며 보스의 집중이 깨졌습니다.`);
+    }
+
+    if(this.hp<250 && this.pattern === true && this.count>0){
+      this.count--;
+      return chalk.red(`보스가 힘을 모으고 있습니다.\n남은 실드 : ${this.shield}`);
+    }
+
+    if(this.count <= 0){
+      player.damage(200);
+      this.pattern = false;
+      this.flag = false;
+      return chalk.red(`보스가 힘을 방출합니다.\n 200의 데미지를 입었습니다.`);
+    }
   }
 }
 
@@ -265,9 +335,19 @@ const battle = async (stage, player, monster) => {
         logs.push(chalk.red(`잘못된 선택`));
             break;
     }
-    logs.push(chalk.green(`${player.currentHp}만큼 체력이 남았습니다.`));
+    if(stage === 10 && monster.pattern == true)
+    {
+      logs.push(monster.countdown(player));
+    }
+    
+    if(stage === 10 && monster.hp <= 250 && monster.flag === true)
+    {
+      monster.pattern = true;
+    }
+    logs.push(chalk.green(`플레이어 체력 : ${player.currentHp}`));
     if(monster.hp <= 0 || run === true)
     {
+      util.update_achievement('monster');
       logs.push(chalk.green(`스테이지${stage} 클리어!`));
       break;
     }
@@ -308,11 +388,21 @@ export async function startGame(cheat, playername) {
   let stage = 1;
 
   while (stage <= 10) {
-    const monster = new Monster(stage,100,5);
+    let monster;
+
+    if(stage === 10)  // 10스테이지에는 보스 객체 생성 그 이전 스테이지는 몬스터 생성
+    {
+      monster = new Boss(600,30);
+    }
+    else{
+      monster = new Monster(stage,100,5);
+    }
+
     await battle(stage, player, monster);
     
     if(player.currentHp <= 0){
       console.clear();
+      util.update_achievement('gameover');
       console.log(chalk.red("Game Over"));
       process.exit(0);
     }
@@ -325,5 +415,6 @@ export async function startGame(cheat, playername) {
   }
   
   console.clear();
+  util.update_achievement('gameclear');
   console.log("Game Clear");
 }

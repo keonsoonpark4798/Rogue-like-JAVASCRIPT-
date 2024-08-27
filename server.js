@@ -2,11 +2,12 @@ import chalk from 'chalk';
 import figlet from 'figlet';
 import readlineSync from 'readline-sync';
 import {startGame} from "./game.js";
+import * as util from './lib/util.js';
 
 let playername = "플레이어";
 // 로비 화면을 출력하는 함수
 function displayLobby() {
-    console.clear();
+    //console.clear();
 
     // 타이틀 텍스트
     console.log(
@@ -55,9 +56,9 @@ function handleUserInput() {
             startGame(false,playername);
             break;
         case '2':
-            console.log(chalk.yellow('구현 준비중입니다.. 게임을 시작하세요'));
+            seeAchievement();
             // 업적 확인하기 로직을 구현
-            handleUserInput();
+            handleAchievementInput();
             break;
         case '3':
             console.log(chalk.blue('1. 치트 모드(모든 스탯이 99999가 됩니다) 2. 플레이어 이름 변경 3. 로비로'));
@@ -90,6 +91,18 @@ function handleOptionInput(){
     }
 }
 
+// 업적 입력
+function handleAchievementInput(){ 
+    const choice = readlineSync.question('타이틀로 이동(yes/no)');
+    switch (choice) {
+        case 'yes':
+            start();
+            break;
+        default:
+            handleAchievementInput();
+    }
+}
+
 function playernameChange(){
     const name = readlineSync.question('이름 입력(한글입력 x): ');
     const regx = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
@@ -99,9 +112,15 @@ function playernameChange(){
     }
     start();
 }
-
+function seeAchievement(){
+    let data = util.print_achievement();
+    console.log(chalk.green(`\n몬스터 킬 : ${data.monster_kill}`));
+    console.log(chalk.green(`게임 클리어 횟수 : ${data.game_clear}`));
+    console.log(chalk.green(`게임 오버 횟수 : ${data.game_over}\n`));
+}
 // 게임 시작 함수
 function start() {
+    util.Create_achievements();
     displayLobby();
     handleUserInput();
 }
