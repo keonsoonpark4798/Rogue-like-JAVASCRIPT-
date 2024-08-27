@@ -50,33 +50,29 @@ function handleUserInput() {
     const choice = readlineSync.question('입력: ');
 
     switch (choice) {
-        case '1':
+        case '1':   // 여기에서 새로운 게임 시작 로직을 구현
             console.log(chalk.green('게임을 시작합니다.'));
-            // 여기에서 새로운 게임 시작 로직을 구현
             startGame(false,playername);
             break;
-        case '2':
+        case '2':   // 업적 확인하기 로직을 구현
             seeAchievement();
-            // 업적 확인하기 로직을 구현
             handleAchievementInput();
             break;
-        case '3':
+        case '3':   // 옵션 메뉴 로직을 구현
             console.log(chalk.blue('1. 치트 모드(모든 스탯이 99999가 됩니다) 2. 플레이어 이름 변경 3. 로비로'));
-            // 옵션 메뉴 로직을 구현
             handleOptionInput();
             break;
-        case '4':
+        case '4':   // 게임 종료 로직을 구현
             console.log(chalk.red('게임을 종료합니다.'));
-            // 게임 종료 로직을 구현
             process.exit(0); // 게임 종료
             break;
-        default:
+        default:    // 유효하지 않은 입력일 경우 다시 입력 받음
             console.log(chalk.red('올바른 선택을 하세요.'));
-            handleUserInput(); // 유효하지 않은 입력일 경우 다시 입력 받음
+            handleUserInput();
     }
 }
 
-// 옵션 입력
+// 옵션칸에서 입력
 function handleOptionInput(){ 
     const choice = readlineSync.question('옵션 입력: ');
     switch (choice) {
@@ -91,7 +87,7 @@ function handleOptionInput(){
     }
 }
 
-// 업적 입력
+// 업적칸에서 입력
 function handleAchievementInput(){ 
     const choice = readlineSync.question('타이틀로 이동(yes/no)');
     switch (choice) {
@@ -103,21 +99,25 @@ function handleAchievementInput(){
     }
 }
 
+// 플레이어 이름 변경 함수
 function playernameChange(){
     const name = readlineSync.question('이름 입력(한글입력 x): ');
-    const regx = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
+    const regx = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/; // readlineSync에서는 한글 입력하면 깨져서 정규식을 통해 한글 입력을 제한
     if(!regx.test(name))
     {
         playername = name;
     }
     start();
 }
+
+// 업적 보기 함수
 function seeAchievement(){
     let data = util.print_achievement();
     console.log(chalk.green(`\n몬스터 킬 : ${data.monster_kill}`));
     console.log(chalk.green(`게임 클리어 횟수 : ${data.game_clear}`));
     console.log(chalk.green(`게임 오버 횟수 : ${data.game_over}\n`));
 }
+
 // 게임 시작 함수
 function start() {
     util.Create_achievements();

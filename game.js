@@ -140,32 +140,34 @@ class Player {
   }
 }
 
-class Monster extends Player{
+class Monster extends Player{     // 몬스터 객체
   constructor(stage,hp,atk) {
     super(hp);
     let ran =  util.random(4,6) / 10; // 0.4 ~ 0.6
     this._hp = hp * stage * ran;
     this._atk = Math.ceil(atk * stage * ran);
+    this.pattern = false;   // 일반 몬스터는 패턴 x
+    this.flag = false;      // 일반 몬스터는 패턴 x
   }
 
-  attack(player) {
+  attack(player) {  // 공격 함수
     player.damage(this._atk);
     return chalk.red(`몬스터가 ${this._atk}의 데미지를 입혔습니다.`);
   }
-  damage(damage){
+  damage(damage){ // 데미지 함수
     this._hp -= damage;
   }
 }
 
-class Boss extends Player{
+class Boss extends Player{    // 보스 객체
   constructor(hp,atk) {
     super(hp);
     this._hp = hp;                
     this._atk = atk;
-    this._shield = 100;
-    this._pattern = false;
-    this.flag = true;
-    this._count = 5;
+    this._shield = 100;     // 실드
+    this._pattern = false;  // 패턴중인지 여부
+    this.flag = true;       // 패턴을 했는지 안 했는지 체크
+    this._count = 5;        // 5턴간 보스 패턴 실행
   }
 
   get shield(){  // 실드 get,set
@@ -189,7 +191,7 @@ class Boss extends Player{
     this._pattern = value;
   }
 
-  attack(player) {
+  attack(player) {    // 공격 함수
     if(this.hp<250 && this.pattern === true) {
     }
     else {
@@ -197,32 +199,34 @@ class Boss extends Player{
       return chalk.red(`보스가 ${this._atk}의 데미지를 입혔습니다.`);
     }
   }
-  damage(damage){
-    if(this.hp<250 && this.pattern === true) {
+  damage(damage){     // 데미지 함수
+    if(this.hp<250 && this.pattern === true) {    // 패턴중일땐 체력이 아닌 실드가 먼저 깎임
       this.shield -= damage;
+      if(this.shield < 0)   // 남은 실드보다 더 큰 데미지를 입었으면 남은 데미지는 체력을 깎음
+        this.hp += this.shield;
     }
     else{
       this.hp -= damage;
     }
   }
-  countdown(player){
-    if(this.shield<=0)
+  countdown(player){    // 카운트다운 함수
+    if(this.shield<=0)  // 실드가 깨졌다면 패턴 파훼 완료
     {
       this.pattern = false;
       this.flag = false;
       return chalk.green(`실드가 깨지며 보스의 집중이 깨졌습니다.`);
     }
 
-    if(this.hp<250 && this.pattern === true && this.count>0){
+    if(this.hp<250 && this.pattern === true && this.count>0){   // 실드가 남아있고 카운트가 남았다면 실드와 남은 턴 카운트을 알려줌
       this.count--;
-      return chalk.red(`보스가 힘을 모으고 있습니다.\n남은 실드 : ${this.shield}`);
+      return chalk.red(`보스가 힘을 모으고 있습니다.\n남은 실드 : ${this.shield}\n남은 턴 : ${this.count}`);
     }
 
-    if(this.count <= 0){
-      player.damage(200);
+    if(this.count <= 0){    // 카운트가 0이 되면 보스가 강력한 딜을 함
+      player.damage(300);
       this.pattern = false;
       this.flag = false;
-      return chalk.red(`보스가 힘을 방출합니다.\n 200의 데미지를 입었습니다.`);
+      return chalk.red(`보스가 힘을 방출합니다.\n 300의 데미지를 입었습니다.`);
     }
   }
 }
@@ -231,17 +235,17 @@ function displayStatus(stage, player, monster) {
   console.log(chalk.magentaBright(`\n=== Current Status ===`));
   console.log(
     chalk.cyanBright(`| Stage: ${stage} `) +
-    chalk.blueBright(
+    chalk.blueBright( // 플레이어 정보
       `| ${player.name} HP: ${player.currentHp}, Attack: ${player.atk}-${player.maxatk}`,
     ) +
-    chalk.redBright(
+    chalk.redBright(  // 몬스터 정보
       `| 몬스터 정보 HP: ${monster.hp}, Attack: ${monster.atk} |`,
     ),
   );
   console.log(chalk.magentaBright(`=====================\n`));
 }
 
-const battle = async (stage, player, monster) => {
+const battle = async (stage, player, monster) => {    // 배틀
   let logs = [];
   let run = false;
   while(player.currentHp > 0) {
@@ -251,7 +255,7 @@ const battle = async (stage, player, monster) => {
     logs.forEach((log) => console.log(log));
 
     console.log(
-      chalk.green(
+      chalk.green(    // * 기능 추가 : 주변을 살펴 일정 확률로 아이템 획득
         `\n1. 공격한다 2. 연속 공격(${player._combo}%) 3. 방어한다(${player._def}%) 4. 도망친다(${player._luk}%) 5. 주변을 살핀다(10%)`,
       ),
     );
@@ -264,12 +268,13 @@ const battle = async (stage, player, monster) => {
     {
         case "1" : // 공격
             logs.push(player.attack(monster));
-            logs.push(monster.attack(player));
+            if(monster.pattern != true)
+              logs.push(monster.attack(player));
             break;
         case "2" : // 연속 공격
             if(ran<=player._combo) {
               logs.push(chalk.green(`이연참!`));
-              util.sound();
+              util.sound();   // 연속 공격 성공시 사운드 출력
               logs.push(player.attack(monster));
               logs.push(player.attack(monster));
             }
@@ -303,18 +308,18 @@ const battle = async (stage, player, monster) => {
               let randomItem = util.random(1,3);
               switch(randomItem)
               {
-                case 1:
-                  logs.push(chalk.green(`검을 발견했습니다!(공격력 1 증가)`));
-                  player.atk += 1;
+                case 1:   // 3분의 1 확률로 검 획득(공격력 2 증가)
+                  logs.push(chalk.green(`검을 발견했습니다!(공격력 2 증가)`));
+                  player.atk += 2;
                   player.maxatk = player.atk + player.atk * player.x;
                   break;
-                case 2:
-                  logs.push(chalk.green(`런닝화를 발견했습니다!(도망확률 2 증가)`));
-                  player.luk += 2;
+                case 2:   // 3분의 1 확률로 런닝화 획득(도망확률 3 증가)
+                  logs.push(chalk.green(`런닝화를 발견했습니다!(도망확률 3 증가)`));
+                  player.luk += 3;
                   break;
-                case 3:
+                case 3:   // 3분의 1 확률로 생명수 획득(체력 30 회복)
                   logs.push(chalk.green(`생명수를 발견했습니다!(체력 30 회복)`));
-                  if(player.currentHp + 30 > player.hp)
+                  if(player.currentHp + 30 > player.hp)   // 최대 체력 이상으론 회복되지 못하게 제한
                   {
                     player.currentHp = player.hp;
                   }
@@ -335,25 +340,25 @@ const battle = async (stage, player, monster) => {
         logs.push(chalk.red(`잘못된 선택`));
             break;
     }
-    if(stage === 10 && monster.pattern == true)
+    if(stage === 10 && monster.pattern == true)    // 보스가 패턴중이라면 출력
     {
       logs.push(monster.countdown(player));
     }
     
-    if(stage === 10 && monster.hp <= 250 && monster.flag === true)
+    if(stage === 10 && monster.hp <= 250 && monster.flag === true)  // 보스가 패턴을 하지 않았고 체력이 250이하면 패턴 ON
     {
       monster.pattern = true;
     }
-    logs.push(chalk.green(`플레이어 체력 : ${player.currentHp}`));
-    if(monster.hp <= 0 || run === true)
+    logs.push(chalk.green(`플레이어 체력 : ${player.currentHp}`));    // 플레이어 남은 체력을 보여줌
+    if(monster.hp <= 0 || run === true)   // 몬스터 체력이 0이 되거나 도망에 성공하면 스테이지 클리어
     {
-      util.update_achievement('monster');
+      util.update_achievement('monster'); // 업적 : 잡은 몬스터 수 카운트
       logs.push(chalk.green(`스테이지${stage} 클리어!`));
       break;
     }
   }
 };
-const rise = async () => {
+const rise = async () => {    // 한 스테이지 클리어 후 레벨업한 결과를 보여주기 위해 휴식 구현(스테이지 클리어하면 체력 풀피되는게 휴식이라 말하면 괜찮을듯해서)
   const choice = readlineSync.question('\n\n휴식을 마치고 탑을 오르겠습니까?(yes/no)');
   switch(choice)
   {
@@ -366,7 +371,7 @@ const rise = async () => {
 };
 export async function startGame(cheat, playername) {
   console.clear();
-  if(playername == null)
+  if(playername == null)    // 옵션에서 플레이어 이름 변경을 하지 않았다면 자동으로 '플레이어'라는 이름으로 시작
     playername = "플레이어";
 
   let hp = 100;     // 초기 값 : 체력, 공격력, 최대공격력 배율, 도망 확률, 연속 공격 확률, 방어 확률
@@ -376,7 +381,7 @@ export async function startGame(cheat, playername) {
   let combo = 25;
   let def = 55;
 
-  if(cheat)
+  if(cheat)     // 옵션에서 치트 모드 선택시 모든 능력치가 99999인 상태로 시작
   {
     hp = 99999;
     atk = 99999;
@@ -392,29 +397,29 @@ export async function startGame(cheat, playername) {
 
     if(stage === 10)  // 10스테이지에는 보스 객체 생성 그 이전 스테이지는 몬스터 생성
     {
-      monster = new Boss(600,30);
+      monster = new Boss(600,30);   // 보스 객체 생성
     }
     else{
-      monster = new Monster(stage,100,5);
+      monster = new Monster(stage,100,5);   // 스테이지에 따른 몬스터 객체 생성
     }
 
     await battle(stage, player, monster);
     
-    if(player.currentHp <= 0){
+    if(player.currentHp <= 0){    // 죽었다면 게임 오버
       console.clear();
-      util.update_achievement('gameover');
+      util.update_achievement('gameover');    // 업적 : 죽은 횟수 카운트
       console.log(chalk.red("Game Over"));
-      process.exit(0);
+      process.exit(0);                        // 게임 종료
     }
-    else {
-      player.levelup();
-      player.heal();
-      await rise();
-      stage++;
+    else {                        // 죽지 않았다면 게임 속행
+      player.levelup();           // 레벨 업
+      player.heal();              // 풀피 회복
+      await rise();               // 비동기로 레벨업 로그를 볼 수 있게 함
+      stage++;                    // NEXT STAGE
     }
   }
   
   console.clear();
-  util.update_achievement('gameclear');
-  console.log("Game Clear");
+  util.update_achievement('gameclear');   // 업적 : 게임 클리어
+  console.log(chalk.green("Game Clear"));
 }
