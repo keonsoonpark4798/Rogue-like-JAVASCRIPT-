@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import readlineSync from 'readline-sync';
 import * as util from './lib/util.js';
+import * as achieve from './lib/achievenemt.js';
 
 class Player {
   constructor(name,hp,atk,x,luk,combo,def) {
@@ -98,17 +99,17 @@ class Player {
     console.log(chalk.green(`레벨업!!\n`));
     for(let i = 0; i<3; i++)
     {
-      const ran = util.random(1,5);
+      const ran = util.random(1,6);
       let num = 0;
       switch(ran)
       {
         case 1: // 체력 업
-          num = util.random(20,30); // 20 ~ 50
+          num = util.random(20,50); // 20 ~ 50
           this.hp += num;
           console.log(chalk.green(`체력이 ${num}만큼 상승했습니다.`));
           break;
         case 2: // 최소 공격력 업
-          num = util.random(5,15);  // 5 ~ 20
+          num = util.random(5,20);  // 5 ~ 20
           this.atk += num;
           console.log(chalk.green(`공격력이 ${num}만큼 상승했습니다.`));
           break;
@@ -119,17 +120,17 @@ class Player {
           console.log(chalk.green(`최대공격력배율이 ${num}만큼 상승했습니다.`));
           break;
         case 4: // 도망 확률 업
-          num = util.random(1,2); // 1 ~ 3
+          num = util.random(1,3); // 1 ~ 3
           this.luk += num;
           console.log(chalk.green(`도망확률이 ${num}만큼 상승했습니다.`));
           break;
         case 5: // 연속 공격 확률 업
-          num = util.random(3,4); // 3 ~ 7
+          num = util.random(3,7); // 3 ~ 7
           this.combo += num;
           console.log(chalk.green(`연속 공격 확률이 ${num}만큼 상승했습니다.`));
           break;
         case 6: // 방어 수치 업(방어 확률 업)
-          num = util.random(3,7);  // 3 ~ 10
+          num = util.random(3,10);  // 3 ~ 10
           this.def += num;
           console.log(chalk.green(`방어 확률이 ${num}만큼 상승했습니다.`));
           break;
@@ -352,7 +353,7 @@ const battle = async (stage, player, monster) => {    // 배틀
     logs.push(chalk.green(`플레이어 체력 : ${player.currentHp}`));    // 플레이어 남은 체력을 보여줌
     if(monster.hp <= 0 || run === true)   // 몬스터 체력이 0이 되거나 도망에 성공하면 스테이지 클리어
     {
-      util.update_achievement('monster'); // 업적 : 잡은 몬스터 수 카운트
+      achieve.update_achievement('monster'); // 업적 : 잡은 몬스터 수 카운트
       logs.push(chalk.green(`스테이지${stage} 클리어!`));
       break;
     }
@@ -407,7 +408,7 @@ export async function startGame(cheat, playername) {
     
     if(player.currentHp <= 0){    // 죽었다면 게임 오버
       console.clear();
-      util.update_achievement('gameover');    // 업적 : 죽은 횟수 카운트
+      achieve.update_achievement('gameover');    // 업적 : 죽은 횟수 카운트
       console.log(chalk.red("Game Over"));
       process.exit(0);                        // 게임 종료
     }
@@ -420,6 +421,6 @@ export async function startGame(cheat, playername) {
   }
   
   console.clear();
-  util.update_achievement('gameclear');   // 업적 : 게임 클리어
+  achieve.update_achievement('gameclear');   // 업적 : 게임 클리어
   console.log(chalk.green("Game Clear"));
 }
